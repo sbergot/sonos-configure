@@ -58,16 +58,37 @@ async function gettokens()
   const households = await res.json();
   const houseID = households.households[0].id;
 
-  console.log('get groups')
-  const resgroups = await fetch(
+  console.log('get players')
+  const resplayers = await fetch(
     `https://api.ws.sonos.com/control/api/v1/households/${houseID}/groups`,
     {
       headers: {
         'Authorization': "Bearer " + tokens.access_token
       }
     });
-  const groups = await resgroups.json();
-  const kitchengroup = groups.groups.find(g => g.name === 'Cuisine');
+  const players = await resplayers.json();
+  console.log('players', players)
+  const kitchenplayer = players.players.find(g => g.name === 'Cuisine');
+  if (!kitchenplayer)
+  {
+    console.log("did not find kitchen player");
+    return;
+  }
+
+  console.log('create kitchen group')
+  const res_creategroup = await fetch(
+    `https://api.ws.sonos.com/control/api/v1/households/${houseID}/groups/createGroup`,
+    {
+      method: 'post',
+      body : JSON.stringify({ playerIds: [kitchenplayer.id] }),
+      headers: {
+        'Authorization': "Bearer " + tokens.access_token,
+        'Content-Type': 'application/json'
+      }
+    });
+  const group = await res_creategroup.json();
+  console.log("created group", group);
+  const kitchengroup = group.group;
 
   console.log('get favorites')
   const resfavorites = await fetch(
@@ -84,7 +105,7 @@ async function gettokens()
   const loadfav_body = {
     favoriteId: france_inter.id
   };
-  await fetch(
+  const setFavResponse = await fetch(
     `https://api.ws.sonos.com/control/api/v1/groups/${kitchengroup.id}/favorites`,
     {
       method: 'post',
@@ -94,4 +115,5 @@ async function gettokens()
         'Content-Type': 'application/json'
       }
     });
+    console.log("result", await setFavResponse.json());
 })();
