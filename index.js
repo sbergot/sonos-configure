@@ -5,12 +5,13 @@ const fetch = require("node-fetch");
 const credentials = require("./credentials.json");
 
 async function gettokens() {
-  // const browser = await puppeteer.launch({
-  //   headless: true,
-  //   executablePath: "/usr/bin/chromium-browser",
-  //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  // });
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: "/usr/bin/chromium-browser",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    timeout: 0,
+  });
+  // const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(
     `https://api.sonos.com/login/v3/oauth?client_id=${credentials.client_id}&response_type=code&state=tata&scope=playback-control-all&redirect_uri=https%3A%2F%2Fgoogle.com`
@@ -110,7 +111,8 @@ async function gettokens() {
     }
   );
   const favorites = await resfavorites.json();
-  const france_inter = favorites.items.find((f) => f.name === "France Inter");
+  console.log(favorites);
+  const france_inter = favorites.items.find((f) => f.id === "12");
 
   console.log("set france inter in cuisine");
   const loadfav_body = {
