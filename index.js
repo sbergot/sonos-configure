@@ -5,6 +5,7 @@ const fetch = require("node-fetch");
 const credentials = require("./credentials.json");
 
 async function gettokens() {
+  console.log('open browser');
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: "/usr/bin/chromium-browser",
@@ -13,18 +14,25 @@ async function gettokens() {
   });
   // const browser = await puppeteer.launch();
   const page = await browser.newPage();
+  page.setDefaultNavigationTimeout(600000);
+  console.log('navigate to auth');
   await page.goto(
     `https://api.sonos.com/login/v3/oauth?client_id=${credentials.client_id}&response_type=code&state=tata&scope=playback-control-all&redirect_uri=https%3A%2F%2Fgoogle.com`
   );
+  console.log('skip first screen');
   await page.click("input.button");
   await page.waitForNavigation();
+  console.log('fill credentials');
   await page.type("input[name=username]", credentials.login);
   await page.type("input[name=password]", credentials.password);
+  console.log('submit login form');
   await page.click("input[type=submit]");
   await page.waitForNavigation();
+  console.log('skip consent screen');
   await page.click("button.button");
   await page.waitForNavigation();
 
+  console.log('read auth code');
   const responseurl = new url.URL(page.url());
   const code = responseurl.searchParams.get("code");
   await browser.close();
@@ -34,6 +42,7 @@ async function gettokens() {
   params.append("code", code);
   params.append("redirect_uri", "https://google.com");
 
+  console.log('fetch access token');
   const basicAuth =
     "Basic " +
     Buffer.from(
@@ -118,16 +127,28 @@ async function gettokens() {
   const loadfav_body = {
     favoriteId: france_inter.id,
   };
-  const setFavResponse = await fetch(
-    `https://api.ws.sonos.com/control/api/v1/groups/${kitchengroup.id}/favorites`,
-    {
-      method: "post",
-      body: JSON.stringify(loadfav_body),
-      headers: {
-        Authorization: "Bearer " + tokens.access_token,
-        "Content-Type": "application/json",
-      },
+  let tryCount = 0;
+  let success = false;
+  while (tryCount < 5 && !success) {
+    console.log(`try counter: ${tryCount}`);
+    const setFavResponse = await fetch(
+      `https://api.ws.sonos.com/control/api/v1/groups/${kitchengroup.id}/favorites`,
+      {
+        method: "post",
+        body: JSON.stringify(loadfav_body),
+        headers: {
+          Authorization: "Bearer " + tokens.access_token,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("response status", setFavResponse.status);
+    console.log("result", await setFavResponse.json());
+    if (setFavResponse.status == 200) {
+      success = true;
+    } else {
+      await new Promise(r => setTimeout(r, 2000));
+      tryCount++;
     }
-  );
-  console.log("result", await setFavResponse.json());
+  }
 })();
