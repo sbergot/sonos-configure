@@ -22,6 +22,7 @@ async function gettokens() {
   console.log('skip first screen');
   await page.click("input.button");
   await page.waitForNavigation();
+  await page.waitForFunction("window.location.href == 'https://login.sonos.com/'")
   console.log('fill credentials');
   await page.type("input[name=username]", credentials.login);
   await page.type("input[name=password]", credentials.password);
