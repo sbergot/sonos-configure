@@ -1,8 +1,9 @@
-const puppeteer = require("puppeteer");
-const url = require("url");
-const fetch = require("node-fetch");
+import puppeteer from 'puppeteer';
+import url from "url";
+import fs from "fs";
+import fetch from "node-fetch";
 
-const credentials = require("./credentials.json");
+const credentials = JSON.parse(fs.readFileSync("./credentials.json"));
 
 async function gettokens() {
   console.log('open browser');
@@ -12,7 +13,6 @@ async function gettokens() {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
     timeout: 0,
   });
-  // const browser = await puppeteer.launch();
   const page = await browser.newPage();
   page.setDefaultNavigationTimeout(600000);
   console.log('navigate to auth');
