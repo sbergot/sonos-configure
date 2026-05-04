@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 const TIMEOUT = 90000;
+console.debug = () => {};
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 console.log(currentDir);
