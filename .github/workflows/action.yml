@@ -1,8 +1,9 @@
 name: GitHub Actions
 run-name: sonos configuration
 on:
-   schedule:
-     - cron: "15 4 * * *"
+  - schedule:
+    - cron: "15 4 * * *"
+  - workflow_dispatch
 jobs:
   Sonos-Configuration:
     runs-on: ubuntu-latest
