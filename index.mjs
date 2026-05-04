@@ -10,7 +10,6 @@ const TIMEOUT = 90000;
 const currentDir = dirname(fileURLToPath(import.meta.url));
 console.log(currentDir);
 console.log(new Date());
-//const credentials = JSON.parse(fs.readFileSync(currentDir + "/credentials.json"));
 
 const credentials = {
   "client_id": process.env.CLIENT_ID,
@@ -23,14 +22,10 @@ async function gettokens() {
   console.log('open browser');
   const browser = await puppeteer.launch({
     headless: true,
-    // executablePath: "/usr/bin/chromium-browser",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
     timeout: 0,
   });
 
-  //const browser = await puppeteer.connect({
-  //  browserWSEndpoint: "ws://127.0.0.1:9222",
-  //});
   const page = await browser.newPage();
   page.setDefaultNavigationTimeout(TIMEOUT);
   console.log('navigate to auth');
@@ -129,7 +124,7 @@ async function gettokens() {
     }
   );
   const group = await res_creategroup.json();
-  console.log("created group", group);
+  console.debug("created group", group);
   const kitchengroup = group.group;
 
   console.log("get favorites");
@@ -142,7 +137,7 @@ async function gettokens() {
     }
   );
   const favorites = await resfavorites.json();
-  console.log(favorites);
+  console.debug(favorites);
   const france_inter = favorites.items.find((f) => f.id === "12");
 
   console.log("set france inter in cuisine");
@@ -165,7 +160,7 @@ async function gettokens() {
       }
     );
     console.log("response status", setFavResponse.status);
-    console.log("result", await setFavResponse.json());
+    console.debug("result", await setFavResponse.json());
     if (setFavResponse.status == 200) {
       success = true;
     } else {
