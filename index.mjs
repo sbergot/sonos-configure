@@ -105,7 +105,7 @@ async function gettokens() {
     }
   );
   const players = await resplayers.json();
-  console.log("players", players);
+  console.debug("players", players);
   const kitchenplayer = players.players.find((g) => g.name === "Cuisine");
   if (!kitchenplayer) {
     console.log("did not find kitchen player");
