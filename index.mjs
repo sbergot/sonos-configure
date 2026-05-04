@@ -24,7 +24,7 @@ async function gettokens() {
   const browser = await puppeteer.launch({
     headless: true,
     // executablePath: "/usr/bin/chromium-browser",
-    //args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
     timeout: 0,
   });
 
