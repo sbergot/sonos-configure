@@ -1,6 +1,8 @@
 name: GitHub Actions
 run-name: sonos configuration
-on: [push]
+on:
+   schedule:
+     - cron: "15 4 * * *"
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
