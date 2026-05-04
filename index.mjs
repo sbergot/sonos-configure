@@ -5,18 +5,25 @@ import fetch from "node-fetch";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-const TIMEOUT = 900000;
+const TIMEOUT = 90000;
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 console.log(currentDir);
 console.log(new Date());
-const credentials = JSON.parse(fs.readFileSync(currentDir + "/credentials.json"));
+//const credentials = JSON.parse(fs.readFileSync(currentDir + "/credentials.json"));
+
+const credentials = {
+  "client_id": process.env.CLIENT_ID,
+  "client_secret": process.env.CLIENT_SECRET,
+  "login": process.env.LOGIN,
+  "password": process.env.PASSWORD
+}
 
 async function gettokens() {
   console.log('open browser');
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: "/usr/bin/chromium-browser",
+    // executablePath: "/usr/bin/chromium-browser",
     //args: ["--no-sandbox", "--disable-setuid-sandbox"],
     timeout: 0,
   });
