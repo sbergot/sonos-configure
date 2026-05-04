@@ -2,27 +2,41 @@ import puppeteer from 'puppeteer';
 import url from "url";
 import fs from "fs";
 import fetch from "node-fetch";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const credentials = JSON.parse(fs.readFileSync("./credentials.json"));
+const TIMEOUT = 900000;
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+console.log(currentDir);
+console.log(new Date());
+const credentials = JSON.parse(fs.readFileSync(currentDir + "/credentials.json"));
 
 async function gettokens() {
   console.log('open browser');
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: "/usr/bin/chromium-browser",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    //args: ["--no-sandbox", "--disable-setuid-sandbox"],
     timeout: 0,
   });
+
+  //const browser = await puppeteer.connect({
+  //  browserWSEndpoint: "ws://127.0.0.1:9222",
+  //});
   const page = await browser.newPage();
-  page.setDefaultNavigationTimeout(600000);
+  page.setDefaultNavigationTimeout(TIMEOUT);
   console.log('navigate to auth');
   await page.goto(
     `https://api.sonos.com/login/v3/oauth?client_id=${credentials.client_id}&response_type=code&state=tata&scope=playback-control-all&redirect_uri=https%3A%2F%2Fgoogle.com`
   );
   console.log('skip first screen');
   await page.click("input.button");
+  console.log('waiting for navigation');
+  console.log(await page.url());
   await page.waitForNavigation();
-  await page.waitForFunction("window.location.href == 'https://login.sonos.com/'")
+  console.log('waiting for login page');
+  await page.waitForFunction(() => window.location.href == 'https://login.sonos.com/', { timeout: TIMEOUT })
   console.log('fill credentials');
   await page.type("input[name=username]", credentials.login);
   await page.type("input[name=password]", credentials.password);
