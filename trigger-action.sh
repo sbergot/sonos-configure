@@ -60,7 +60,17 @@ case "$HTTP_CODE" in
     echo "workflow '${WORKFLOW}' triggered on '${REF}' (HTTP 204)."
     ;;
   401|403)
-    echo "error: authentication/permission denied (HTTP ${HTTP_CODE}) - check the PAT in '$PAT_FILE' and its scopes." >&2
+    echo "error: authentication/permission denied (HTTP ${HTTP_CODE})." >&2
+    REQUIRED="$(grep -i '^X-Accepted-GitHub-Permissions:' "$HEADERS" | tr -d '\r' | cut -d: -f2- | xargs || true)"
+    if [[ -n "$REQUIRED" ]]; then
+      echo "hint: the API says this token needs permission: ${REQUIRED}" >&2
+      echo "      for a fine-grained PAT, edit the token at github.com/settings/tokens:" >&2
+      echo "        - Repository access: include '${REPO}' (Public read-only is NOT enough for dispatch)" >&2
+      echo "        - Repository permissions: Actions -> Read and write" >&2
+      echo "      (a classic PAT with the 'repo' scope also works)" >&2
+    else
+      echo "hint: check that the PAT in '$PAT_FILE' is valid and not expired." >&2
+    fi
     echo "$BODY" >&2
     exit 1
     ;;
